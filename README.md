@@ -1,6 +1,6 @@
 # Inventory Sync CLI for WooCommerce
 
-An original CodexaWP CLI demo for reviewing and applying versioned warehouse stock snapshots. The storefront remains on WooCommerce's product stock API.
+A warehouse stock update can become stale while someone reviews it. This CodexaWP WP-CLI sample flags that conflict and applies current, versioned stock updates through WooCommerce's product stock API.
 
 ## Try it
 
@@ -11,6 +11,8 @@ Use the columns `sku,stock,version` and assign a monotonically increasing intege
 Activate this plugin on a disposable WordPress site with WooCommerce active and `WP_ENVIRONMENT_TYPE` set to `local`. Set `CODEXAWP_TEST_WP_LOAD` to the absolute path to that site's `wp-load.php`, then run `php tests/check.php` from this repository.
 
 The WordPress fixture calls the same planning and application functions as WP-CLI. It checks that preview is read-only, valid changes persist, replay is skipped, and a quantity edited between preview and apply is preserved.
+
+The recorded run shows a read-only preview, a conflict after stock changes, and a stale replay. It also checks an independently managed variation. [Recorded integration output](docs/verification.txt)
 
 ## License
 
