@@ -19,6 +19,20 @@ function check( bool $ok, string $message ): void {
 use function CodexaWP\Inventory\apply;
 use function CodexaWP\Inventory\plan;
 
+if ( '--decrease' === ( $argv[1] ?? '' ) ) {
+	$product_id = (int) ( $argv[2] ?? 0 );
+	add_action( 'woocommerce_product_before_set_stock', static function ( WC_Product $product ) use ( $product_id ): void {
+		if ( $product_id === $product->get_id() ) {
+			fwrite( STDOUT, "decreasing\n" );
+			fflush( STDOUT );
+		}
+	} );
+	wc_update_product_stock( $product_id, 3, 'decrease' );
+	wp_cache_delete( $product_id, 'post_meta' );
+	echo get_post_meta( $product_id, '_stock', true ) . PHP_EOL;
+	exit;
+}
+
 $create = static function ( int $stock ): \WC_Product_Simple {
 	$product = new WC_Product_Simple();
 	$product->set_name( 'Inventory sample' );
@@ -54,3 +68,52 @@ $variant->set_stock_quantity( 9 );
 $variant->save();
 $variation_plan = plan( [ [ 'sku' => $variant->get_sku(), 'stock' => '7', 'version' => '1' ] ] );
 check( 'applied' === apply( $variation_plan )[0]['status'] && 7 === (int) wc_get_product( $variant->get_id() )->get_stock_quantity(), 'Updates stock owned by a variation' );
+
+$before_failure = $create( 16 );
+$failed_plan = plan( [ [ 'sku' => $before_failure->get_sku(), 'stock' => '0', 'version' => '1' ] ] );
+$refuse_version_write = static function ( $check, int $id, string $key ) use ( $before_failure ) {
+	return $id === $before_failure->get_id() && \CodexaWP\Inventory\VERSION_KEY === $key ? false : $check;
+};
+add_filter( 'update_post_metadata', $refuse_version_write, 10, 3 );
+try {
+	check( 'error' === apply( $failed_plan )[0]['status'], 'A failed version write aborts the import' );
+} finally {
+	remove_filter( 'update_post_metadata', $refuse_version_write, 10 );
+}
+check( 16 === (int) wc_get_product( $before_failure->get_id() )->get_stock_quantity() && '' === get_post_meta( $before_failure->get_id(), \CodexaWP\Inventory\VERSION_KEY, true ), 'Rollback restores both stock and version' );
+check( 'applied' === apply( $failed_plan )[0]['status'], 'The same plan can be retried after rollback' );
+
+$concurrent = $create( 20 );
+$parallel_plan = plan( [ [ 'sku' => $concurrent->get_sku(), 'stock' => '12', 'version' => '1' ] ] );
+$worker = null;
+$pipes = [];
+$start_sale = static function ( WC_Product $product ) use ( $concurrent, &$worker, &$pipes ): void {
+	if ( $product->get_id() !== $concurrent->get_id() || null !== $worker ) {
+		return;
+	}
+	$worker = proc_open( [ PHP_BINARY, __FILE__, '--decrease', (string) $product->get_id() ], [ 1 => [ 'pipe', 'w' ], 2 => [ 'pipe', 'w' ] ], $pipes );
+	if ( ! is_resource( $worker ) || "decreasing\n" !== str_replace( "\r", '', (string) fgets( $pipes[1] ) ) ) {
+		throw new RuntimeException( 'The separate WooCommerce stock worker did not start.' );
+	}
+	usleep( 100000 );
+	check( proc_get_status( $worker )['running'], 'The WooCommerce stock worker waits for the import transaction' );
+};
+add_action( 'woocommerce_product_before_set_stock', $start_sale );
+try {
+	check( 'applied' === apply( $parallel_plan )[0]['status'], 'The import transaction commits while a native decrease waits' );
+	if ( ! is_resource( $worker ) ) {
+		throw new RuntimeException( 'Missing stock worker.' );
+	}
+	$sale_result = trim( (string) stream_get_contents( $pipes[1] ) );
+	check( is_numeric( $sale_result ) && 9.0 === (float) $sale_result, 'The native WooCommerce decrease applies to the committed amount' );
+	$fresh_stock = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT meta_value FROM %i WHERE post_id=%d AND meta_key=%s', $wpdb->postmeta, $concurrent->get_id(), '_stock' ) );
+	check( 9 === $fresh_stock, 'The persisted stock includes both changes' );
+} finally {
+	remove_action( 'woocommerce_product_before_set_stock', $start_sale );
+	if ( is_resource( $worker ) ) {
+		foreach ( $pipes as $pipe ) {
+			fclose( $pipe );
+		}
+		proc_close( $worker );
+	}
+}

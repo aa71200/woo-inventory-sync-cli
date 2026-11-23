@@ -12,7 +12,9 @@ Use the columns `sku,stock,version` and assign a monotonically increasing intege
 
 Activate this plugin on a disposable WordPress site with WooCommerce active and `WP_ENVIRONMENT_TYPE` set to `local`. Set `CODEXAWP_TEST_WP_LOAD` to the absolute path to that site's `wp-load.php`, then run `php tests/check.php` from this repository.
 
-The WordPress fixture calls the same planning and application functions as WP-CLI. It checks that preview is read-only, valid changes persist, replay is skipped, and a quantity edited between preview and apply is preserved.
+The WordPress fixture calls the same planning and application functions as WP-CLI. It checks that preview is read-only, valid changes persist, replay is skipped, and a quantity edited between preview and apply is preserved. A failed version write must roll back both values. A second PHP process exercises a native WooCommerce decrease competing with an import.
+
+Apply requires native CPT product storage and InnoDB tables. The transaction uses the product's current metadata under lock and records the quantity and source version together. Test the specific data store and integrations before using this demonstration on any other setup.
 
 The recorded run shows a read-only preview, a conflict after stock changes, and a stale replay. It also checks an independently managed variation. [Recorded integration output](docs/verification.txt)
 
