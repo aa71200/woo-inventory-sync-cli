@@ -1,5 +1,7 @@
 # Inventory Sync CLI for WooCommerce
 
+**What to try.** Preview a versioned inventory file and run the fixture to check that an intervening stock change is preserved.
+
 [![WordPress and WooCommerce integration checks](https://github.com/aa71200/woo-inventory-sync-cli/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/aa71200/woo-inventory-sync-cli/actions/workflows/checks.yml)
 
 A warehouse stock update can become stale while someone reviews it. This CodexaWP WP-CLI sample flags that conflict and applies current, versioned stock updates through WooCommerce's product stock API.

@@ -1,0 +1,48 @@
+{
+    "_comment": "Pre-existing findings from the portfolio review. Counts are limited to this file and sniff. Remove entries as code is corrected.",
+    "files": {
+        "tests/check.php": {
+            "ERROR Generic.Files.LineEndings.InvalidEOLChar": 1,
+            "ERROR PEAR.Functions.FunctionCallSignature.CloseBracketLine": 1,
+            "ERROR PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket": 1,
+            "ERROR PEAR.Functions.FunctionCallSignature.MultipleArguments": 1,
+            "ERROR Squiz.Commenting.FileComment.Missing": 1,
+            "ERROR Squiz.Commenting.FunctionComment.Missing": 1,
+            "ERROR Universal.Arrays.DisallowShortArraySyntax.Found": 17,
+            "ERROR WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 7,
+            "ERROR WordPress.Security.EscapeOutput.ExceptionNotEscaped": 1,
+            "ERROR WordPress.Security.EscapeOutput.OutputNotEscaped": 2,
+            "ERROR WordPress.WP.GlobalVariablesOverride.Prohibited": 1,
+            "WARNING Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 11,
+            "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 1,
+            "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 1,
+            "WARNING WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open": 1,
+            "WARNING WordPress.WP.AlternativeFunctions.file_system_operations_fclose": 1,
+            "WARNING WordPress.WP.AlternativeFunctions.file_system_operations_fwrite": 1
+        },
+        "woo-inventory-sync-cli.php": {
+            "ERROR Generic.Files.LineEndings.InvalidEOLChar": 1,
+            "ERROR PEAR.Functions.FunctionCallSignature.CloseBracketLine": 5,
+            "ERROR PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket": 5,
+            "ERROR PEAR.Functions.FunctionCallSignature.Indent": 1,
+            "ERROR PEAR.Functions.FunctionCallSignature.MultipleArguments": 6,
+            "ERROR PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter": 1,
+            "ERROR Squiz.Commenting.FileComment.MissingPackageTag": 1,
+            "ERROR Squiz.Commenting.FileComment.SpacingAfterComment": 1,
+            "ERROR Squiz.Commenting.FunctionComment.Missing": 6,
+            "ERROR Universal.Arrays.DisallowShortArraySyntax.Found": 21,
+            "ERROR WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine": 14,
+            "ERROR WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound": 2,
+            "ERROR WordPress.Arrays.ArrayKeySpacingRestrictions.NoSpacesAroundArrayKeys": 1,
+            "WARNING Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition": 1,
+            "WARNING Generic.Formatting.MultipleStatementAlignment.NotSameWarning": 10,
+            "WARNING WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned": 3,
+            "WARNING WordPress.DB.DirectDatabaseQuery.DirectQuery": 5,
+            "WARNING WordPress.DB.DirectDatabaseQuery.NoCaching": 2,
+            "WARNING WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber": 1,
+            "WARNING WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents": 1,
+            "WARNING WordPress.WP.AlternativeFunctions.file_system_operations_fclose": 1,
+            "WARNING WordPress.WP.AlternativeFunctions.file_system_operations_fopen": 1
+        }
+    }
+}
