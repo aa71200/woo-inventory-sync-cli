@@ -1,0 +1,7 @@
+PASS: Preview leaves stock untouched
+PASS: Applies the valid stock change
+PASS: Preserves a change made after preview
+PASS: Replaying the saved plan does not reapply stock
+PASS: Duplicate SKU is flagged
+PASS: Unmatched SKU is flagged
+PASS: Updates stock owned by a variation
