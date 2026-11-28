@@ -186,6 +186,11 @@ function parse( string $file ): array {
 		throw new \RuntimeException( 'Cannot read the CSV file.' );
 	}
 	try {
+		// A UTF-8 BOM must be consumed before fgetcsv detects a quoted header.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Read the prefix of the local stream subsequently consumed by fgetcsv.
+		if ( "\xEF\xBB\xBF" !== fread( $handle, 3 ) ) {
+			rewind( $handle );
+		}
 		if ( [ 'sku', 'stock', 'version' ] !== fgetcsv( $handle, 0, ',', '"', '' ) ) {
 			throw new \RuntimeException( 'Expected header: sku,stock,version.' );
 		}

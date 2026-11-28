@@ -17,6 +17,7 @@ function check( bool $ok, string $message ): void {
 }
 
 use function CodexaWP\Inventory\apply;
+use function CodexaWP\Inventory\parse;
 use function CodexaWP\Inventory\plan;
 
 if ( '--decrease' === ( $argv[1] ?? '' ) ) {
@@ -31,6 +32,31 @@ if ( '--decrease' === ( $argv[1] ?? '' ) ) {
 	wp_cache_delete( $product_id, 'post_meta' );
 	echo get_post_meta( $product_id, '_stock', true ) . PHP_EOL;
 	exit;
+}
+
+require_once ABSPATH . 'wp-admin/includes/file.php';
+$csv = wp_tempnam( 'stock.csv' );
+if ( ! $csv ) {
+	throw new RuntimeException( 'Could not create the CSV fixture.' );
+}
+try {
+	$expected = array(
+		array(
+			'sku'     => '0007',
+			'stock'   => '8',
+			'version' => '1',
+		),
+	);
+	foreach ( array( '', "\xEF\xBB\xBF" ) as $bom ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write the exact bytes of a local CLI fixture.
+		if ( false === file_put_contents( $csv, $bom . "\"sku\",stock,version\r\n\"0007\",8,1\r\n" ) ) {
+			throw new RuntimeException( 'Could not write the CSV fixture.' );
+		}
+		$actual = parse( $csv );
+		check( $expected === $actual, 'Reads CSV headers and preserves leading zeros in SKUs' );
+	}
+} finally {
+	wp_delete_file( $csv );
 }
 
 $create = static function ( int $stock ): \WC_Product_Simple {
